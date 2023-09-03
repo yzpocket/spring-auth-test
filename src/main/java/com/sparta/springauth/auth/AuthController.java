@@ -1,7 +1,9 @@
 package com.sparta.springauth.auth;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,34 @@ public class AuthController {
 
         return "getCookie : " + value; //반환했으므로 getCookie : Robbie Auth 가 클라이언트 브라우저에서 보여진다. //개발자도구에서도 요청에대한 get-cookie에 대한 헤더를 보면 Authorization=Robbie%20Auth가 쿠키에 보여진다.
     }
+
+    // 세션 생성 메소드
+    //HttpSession 클래스를 통해 세션을 구현 할 수 있다.
+    @GetMapping("/create-session") //http://localhost:8080/api/create-session 를통해 테스트하자.
+    // 클라이언트의 response head나 application cookies 탭를 보면 JSESSIONID=BDB80F22CADCE293B4A36AAD04F3D5CF; Path=/; HttpOnly같은 세션이 생성된 것을 볼 수 있다.
+    public String createSession(HttpServletRequest req) { // request받기
+        // 세션이 존재할 경우 세션 반환, 없을 경우 새로운 세션을 생성한 후 반환
+        HttpSession session = req.getSession(true); //getSession()메소드를 통해 세션이 존재하면 그대로 반환, 없으면 생성함
+
+        // 세션에 저장하기
+        // 세션에 저장될 정보 Name - Value 를 추가합니다.
+        session.setAttribute(AUTHORIZATION_HEADER, "Robbie Auth");
+
+        return "createSession";
+    }
+
+    // 세션 읽기 메소드
+    @GetMapping("/get-session") //http://localhost:8080/api/get-session 로 테스트하자.
+    public String getSession(HttpServletRequest req) {
+        // 세션이 존재할 경우 세션 반환, 없을 경우 null 반환
+        HttpSession session = req.getSession(false);
+
+        String value = (String) session.getAttribute(AUTHORIZATION_HEADER); // 가져온 세션에 저장된 Value 를 Name 을 사용하여 가져옵니다.
+        System.out.println("value = " + value);
+
+        return "getSession : " + value;
+    }
+
 
     public static void addCookie(String cookieValue, HttpServletResponse res) { //get메소드에 따라 쿠키저장 메소드인 이부분이 실행된다. value와 빈 res 객체가 매개변수로 전달되어들어왔다.
         try {
