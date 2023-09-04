@@ -1,5 +1,8 @@
 package com.sparta.springauth.auth;
 
+import com.sparta.springauth.entity.UserRoleEnum;
+import com.sparta.springauth.jwt.JwtUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,8 +19,15 @@ import java.net.URLEncoder;
 @RestController
 @RequestMapping("/api")
 public class AuthController {
-
     public static final String AUTHORIZATION_HEADER = "Authorization"; // 헤더의 Name을 상수 변수에 넣어두자. 아래 들어가면 메소드가 복잡해지기때문 크게 상관은없음.
+
+    // JWT테스트용 Bean 가져오기 변수
+    private final JwtUtil jwtUtil;
+    public AuthController(JwtUtil jwtUtil){ //생성자로 받아오기 // 또는 클래스에 @RequireArgsConstructor 써도됨
+        this.jwtUtil = jwtUtil;
+    }
+
+    // -------------------------------------------- Cookie 및 Session 메소드 ------------------------------------------------------
 
     // 쿠키 생성 메소드
     @GetMapping("/create-cookie") // <- http://localhost:8080/api/create-cookie 로 테스트해보자.
@@ -76,5 +86,40 @@ public class AuthController {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    // ------------------------------------------------------ JWT 테스트 메소드 ------------------------------------------------------
+    // JWT토큰 생성 메소드 -> http://localhost:8080/api/create-jwt -> 생성 후 토큰값 Value(식별자 bearer같은거 뺴고) jwt.io에서 알고리즘 선택 후 JSON 확인가능
+    @GetMapping("/create-jwt")
+    public String createJwt(HttpServletResponse res) {
+        // Jwt 생성
+        String token = jwtUtil.createToken("Robbie", UserRoleEnum.USER); //<- 생성자에 name, 권한을 매개변수로 넘겨야 하므로 메소드 호출 인자에 넣어서 호출함!
+
+        // Jwt 쿠키 저장
+        jwtUtil.addJwtToCookie(token, res);
+
+        return "createJwt : " + token;
+    }
+    // JWT토큰 정보 읽기 메소드 - http://localhost:8080/api/get-jwt
+    @GetMapping("/get-jwt")
+    public String getJwt(@CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
+        // JWT 토큰 substring
+        String token = jwtUtil.substringToken(tokenValue);
+
+        // 토큰 검증
+        if(!jwtUtil.validateToken(token)){
+            throw new IllegalArgumentException("Token Error");
+        }
+
+        // 토큰에서 사용자 정보 가져오기
+        Claims info = jwtUtil.getUserInfoFromToken(token);
+        // 사용자 username
+        String username = info.getSubject();
+        System.out.println("username = " + username); //username = Robbie
+        // 사용자 권한
+        String authority = (String) info.get(JwtUtil.AUTHORIZATION_KEY);
+        System.out.println("authority = " + authority); //authority = USER
+
+        return "getJwt : " + username + ", " + authority; //프론트로 반환 or Body넘기는거면 POSTMAN에서 확인
     }
 }
