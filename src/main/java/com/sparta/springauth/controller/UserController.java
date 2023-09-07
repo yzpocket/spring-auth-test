@@ -35,16 +35,5 @@ public class UserController {
         userService.signup(requestDto);
         return "redirect:/api/user/login-page";
     }
-
-    // 로그인 API
-    @PostMapping("/user/login")
-    public String login(LoginRequestDto requestDto, HttpServletResponse res) {
-        try{
-            userService.login(requestDto, res);
-        }catch (Exception e){
-            return "redirect:/api/user/login-page?error";
-        }
-        return "redirect:/";
-
-    }
+    // 로그인 API는 Jwt 로그인 구현으로 삭제됨
 }
