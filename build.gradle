@@ -26,18 +26,31 @@ dependencies {
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
     // JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
     // MySQL
     runtimeOnly 'com.mysql:mysql-connector-j'
+
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Tymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // SpringBoot WEB
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // SpringBoot TEST
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
